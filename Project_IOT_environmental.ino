@@ -26,7 +26,7 @@ DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BME280 bme;
 
 // TEMT6000 Luminosity Sensor Configuration
-#define TEMT6000_PIN 34
+#define TEMT6000_PIN A0
 
 // Wi-Fi and MQTT Broker Configuration
 const char* ssid = "Holmes";
@@ -50,9 +50,16 @@ bool authorized = false;  // To track authorization status
 String incomingMessage = "";  // Variable to store incoming message
 bool waitingForMessage = false;  // Flag to know if we are displaying a message
 unsigned long previousMillis = 0; 
-const unsigned long sensorInterval = 5000; 
+const unsigned long sensorInterval = 5000;
+
 
 void setup_wifi() {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.printf("Room %d\n", ROOM);
+  display.println("Connecting to Wi-Fi...");
+  display.display();
+
   delay(10);
   Serial.println("Connecting to Wi-Fi...");
   WiFi.begin(ssid, password);
@@ -62,13 +69,33 @@ void setup_wifi() {
   }
   Serial.println("\nWi-Fi connected!");
   Serial.println(WiFi.localIP());
+
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.printf("Room %d\n", ROOM);
+  display.println("Wi-Fi Connected!");
+  display.display();
+  delay(2000);
 }
 
 void reconnect() {
   while (!client.connected()) {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.printf("Room %d\n", ROOM);
+    display.println("Connecting to MQTT...");
+    display.display();
+
     Serial.print("Connecting to MQTT broker...");
     if (client.connect("ESP32_Room2")) {
       Serial.println("connected!");
+      display.clearDisplay();
+      display.setCursor(0, 0);
+      display.printf("Room %d\n", ROOM);
+      display.println("MQTT Connected!");
+      display.display();
+      delay(2000);
+
       client.subscribe(auth_response_topic);  // Subscribe to authorization response
       client.subscribe(message_topic);  // Subscribe to messages
       client.subscribe(cancel_auth_topic);  // Subscribe to cancel auth topic
@@ -103,7 +130,7 @@ void readAndPublishSensorData() {
   float humidity = dht.readHumidity();
   float pressure = bme.readPressure() / 100.0F; 
   int rawValue = analogRead(TEMT6000_PIN);
-  float lux = (rawValue * 5.0 / 1023.0) / 10e-6 * 2.0;
+  float lux = (rawValue * 5.0 / 1023.0) * 2000;
 
   if (isnan(temperature) || isnan(humidity)) {
     Serial.println("Failed to read from DHT sensor!");
@@ -129,6 +156,12 @@ void handleAuthorization() {
   char json_message[64];
   snprintf(json_message, sizeof(json_message), "{\"room\":%d}", ROOM);
   client.publish(auth_request_topic, json_message);
+
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.println("Auth Request Sent");
+  display.display();
+  delay(1000);
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
