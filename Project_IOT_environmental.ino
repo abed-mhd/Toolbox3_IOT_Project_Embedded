@@ -31,7 +31,7 @@ Adafruit_BME280 bme;
 // Wi-Fi and MQTT Broker Configuration
 const char* ssid = "Holmes";
 const char* password = "aptx4869";
-const char* mqtt_server = "ae41308fab084effb7d4b6c6146ea3c5.s1.eu.hivemq.cloud";
+const char* mqtt_server = "594bf801d8c342e993ed74b68dbbc232.s1.eu.hivemq.cloud";
 const char* unique_identifier = "clientId-drs69JNJJC";
 const char* mqtt_username = "esp32_client"; // replace with your Username
 const char* mqtt_password = "Esp32_client_pwd"; // replace with your Password
